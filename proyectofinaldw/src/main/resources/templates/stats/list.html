@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Estadísticas</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+  <style>
+    body {
+      background-color: #121212;
+      color: #f1f1f1;
+    }
+
+    .table-dark-custom th,
+    .table-dark-custom td {
+      border-color: #333;
+    }
+
+    .btn-refresh {
+      margin-top: 10px;
+    }
+  </style>
+</head>
+
+<body>
+  <nav class="navbar navbar-dark bg-dark p-3">
+    <span class="navbar-brand mb-0 h1">Estadísticas del Sistema</span>
+  </nav>
+
+  <div class="container mt-4">
+    <table class="table table-dark table-hover table-dark-custom mt-3" id="tablaEstadisticas">
+      <thead>
+        <button class="btn btn-primary ms-auto" id="btnRefrescar">Actualizar</button>
+        <tr>
+          <th>Fecha</th>
+          <th>Visitas</th>
+          <th>Completadas</th>
+          <th>Fallidas</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr th:each="s : ${stats}">
+          <td th:text="${s.fecha}"></td>
+          <td th:text="${s.visitas}"></td>
+          <td th:text="${s.misionesCompletadas}"></td>
+          <td th:text="${s.misionesFallidas}"></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <script>
+    document.getElementById("btnRefrescar").addEventListener("click", cargarEstadisticas);
+
+    async function cargarEstadisticas() {
+      try {
+        const res = await fetch("/api/estadisticas");
+        if (!res.ok) throw new Error("Error al obtener estadísticas");
+        const data = await res.json();
+
+        const tbody = document.querySelector("#tablaEstadisticas tbody");
+        tbody.innerHTML = "";
+
+        data.forEach(stat => {
+          const fila = document.createElement("tr");
+          fila.innerHTML = `
+            <td>${stat.fecha}</td>
+            <td>${stat.visitas}</td>
+            <td>${stat.misionesCompletadas}</td>
+            <td>${stat.misionesFallidas}</td>
+          `;
+          tbody.appendChild(fila);
+        });
+      } catch (err) {
+        alert("No se pudieron actualizar las estadísticas.");
+        console.error(err);
+      }
+    }
+  </script>
+</body>
+
+</html>

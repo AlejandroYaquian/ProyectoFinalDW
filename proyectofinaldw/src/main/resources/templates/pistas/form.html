@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Configurar Pista</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+  <style>
+    body {
+      background-color: #121212;
+      color: #f1f1f1;
+    }
+    #tablero {
+      display: grid;
+      grid-template-columns: repeat(5, 100px);
+      grid-template-rows: repeat(4, 100px);
+      gap: 8px;
+      margin-top: 20px;
+      justify-content: center;
+    }
+    .celda {
+      width: 100px;
+      height: 100px;
+      background-color: #1e1e1e;
+      border: 1px solid #333;
+      cursor: pointer;
+      transition: background-color 0.15s ease-in-out;
+    }
+    .celda:hover {
+      background-color: #2a2a2a;
+    }
+    .pista {
+      background-color: #4caf50 !important;
+    }
+    .btn-primary {
+      background-color: #1976d2;
+      border-color: #1976d2;
+    }
+    .btn-secondary {
+      background-color: #555;
+      border-color: #555;
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar navbar-dark bg-dark p-3">
+    <span class="navbar-brand mb-0 h1">Configurar Pista</span>
+  </nav>
+
+  <div class="container mt-4">
+    <h2 th:text="${pista.id != null ? 'Editar Pista' : 'Nueva Pista'}"></h2>
+
+    <form th:action="@{/pistas/guardar}" method="post" id="formPista">
+      <input type="hidden" name="id" th:value="${pista.id}">
+      
+      <div class="mb-3">
+        <label>Nombre de la pista</label>
+        <input type="text" name="nombre" th:value="${pista.nombre}" class="form-control bg-dark text-light" required>
+      </div>
+
+      <p>Haz clic en los cuadros para definir el recorrido de la pista:</p>
+      <div id="tablero"></div>
+
+      <input type="hidden" name="configuracionJson" id="configuracionJson" th:value="${pista.configuracionJson}">
+      
+      <button type="submit" class="btn btn-primary mt-3">Guardar</button>
+      <a href="/pistas" class="btn btn-secondary mt-3">Cancelar</a>
+    </form>
+  </div>
+
+  <script th:inline="javascript">
+    const filas = 4;
+    const columnas = 5;
+    const tablero = document.getElementById("tablero");
+    let pista = [];
+
+    const pistaGuardada = /*[[${pista.configuracionJson != null ? pista.configuracionJson : '[]'}]]*/ '[]';
+    try {
+      pista = JSON.parse(pistaGuardada);
+    } catch { pista = []; }
+
+    function crearTablero() {
+      tablero.innerHTML = "";
+      for (let f = 0; f < filas; f++) {
+        for (let c = 0; c < columnas; c++) {
+          const celda = document.createElement("div");
+          celda.classList.add("celda");
+
+          if (pista.some(p => p[0] === f && p[1] === c)) {
+            celda.classList.add("pista");
+            celda.style.backgroundColor = "#4caf50";
+          }
+
+          celda.addEventListener("click", () => {
+            toggleCelda(f, c, celda);
+            celda.style.backgroundColor = celda.classList.contains("pista") ? "#4caf50" : "#1e1e1e";
+          });
+          tablero.appendChild(celda);
+        }
+      }
+    }
+
+    function toggleCelda(f, c, celda) {
+      const idx = pista.findIndex(p => p[0] === f && p[1] === c);
+      if (idx >= 0) pista.splice(idx, 1);
+      else pista.push([f, c]);
+      celda.classList.toggle("pista");
+      document.getElementById("configuracionJson").value = JSON.stringify(pista);
+    }
+
+    crearTablero();
+  </script>
+</body>
+</html>

@@ -359,9 +359,13 @@
                     return;
                 }
 
-                if (indicePista < pista.length && pista[indicePista][0] === nuevaFila && pista[indicePista][1] === nuevaColumna) {
+                if (indicePista < pista.length &&
+                    pista[indicePista][0] === nuevaFila &&
+                    pista[indicePista][1] === nuevaColumna) {
                     indicePista++;
-                } else if (!pista.some(p => p[0] === nuevaFila && p[1] === nuevaColumna)) {
+                }
+
+                else if (!pista.some(p => p[0] === nuevaFila && p[1] === nuevaColumna)) {
                     mostrarMensaje("Te saliste de la pista.");
                     robot.fila = nuevaFila;
                     robot.columna = nuevaColumna;
@@ -370,6 +374,17 @@
                     setTimeout(reiniciar, 2000);
                     return;
                 }
+
+                robot.fila = nuevaFila;
+                robot.columna = nuevaColumna;
+                crearTablero();
+
+                if (indicePista >= pista.length) {
+                    mostrarMensaje("¡Felicitaciones, misión completada!");
+                    juegoTerminado = true;
+                    setTimeout(reiniciar, 2000);
+                }
+
 
                 robot.fila = nuevaFila;
                 robot.columna = nuevaColumna;
